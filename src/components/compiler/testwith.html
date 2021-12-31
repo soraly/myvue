@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+
+    </div>
+    <script>
+        var obj = {name: 'xiang',id: 123}
+        var key = 23;
+        with (obj){
+            console.log(name);
+            console.log(id);
+            console.log(key);
+            console.log(key2); //报错，key2 is not defined
+        }
+    </script>
+</body>
+</html>

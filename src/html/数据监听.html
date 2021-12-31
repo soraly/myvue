@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var data = {
+            name: 'xiang',
+            age: 20,
+            info: {
+                address: '杭州'
+            },
+            nums: [1, 2, 3, 4]
+        }
+
+        //监听数组
+        //获取数组原型
+        var oldProto = Array.prototype;
+        
+        //拷贝一份新的原型出来，修改了不会影响原来的原型
+        var newPrototype = Object.create(oldProto);
+
+        //修改数组原型的push、pop等常用方法
+        newPrototype.push = function () {
+            updateView(); //触发视图更新
+            oldProto.push.call(this, ...arguments)
+        }
+        newPrototype.slice = function () {
+            updateView();
+            oldProto.slice.call(this, ...arguments)
+        }
+
+        // //可以简写为：
+        // ['push','pop','shift','unshift','slice'].forEach(methodName=>{
+        //     newPrototype[methodName] = function(){
+        //         updateView();
+        //         oldProto[methodName].call(this, ...arguments)
+        //     }
+        // })
+
+        function Observe(data) {
+            if (typeof data !== 'object' || data === null) {
+                return;
+            }
+
+            //在obsrve函数里特殊处理数组
+            if (Array.isArray(data)) {
+                data.__proto__ = newPrototype
+            } else {
+                for (var key in data) {
+                    defineReactive(data, key, data[key])
+                }
+            }
+
+
+        }
+
+        function defineReactive(target, key, value) {
+            //当传入的key是一个对象时，比如 info: {address: '杭州' }，由于info是一个对象，只修改info对象里的值，
+            //由于对象的地址没不变，所以监听不到对象变化。只有修改info整个值才能被认为是值有变化
+            //所以这儿需要再次调用 Observe 函数，递归监听对象里的值
+            Observe(value);
+
+            Object.defineProperty(target, key, {
+                set(newval) {
+                    //深度监听，当对象被赋值一个对象时，data.age = {id: 123}，需要用到
+                    Observe(newval);
+
+                    value = newval //注意这里的value是一个闭包，所以设置完后，get函数可以获取到该值
+
+                    updateView(); //触发视图更新
+                },
+                get() {
+                    return value
+                }
+            })
+        }
+
+        function updateView() {
+            console.log('视图更新了')
+        }
+
+
+        Observe(data)
+
+        // data.name = 'fenfen';
+        // data.info.address = '湖州';
+        // data.age = {id: 123};
+        // data.age = 666; 
+        // data.newprop = 'hello' //新增属性，监听不到，所以有Vue.set
+        // delete data.age //删除属性，监听不到，所以有Vue.delete
+        data.nums.push(666);
+        
+        console.log(data.nums, 'data.nums')
+
+    </script>
+</body>
+
+</html>

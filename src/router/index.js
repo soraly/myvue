@@ -4,6 +4,7 @@ import ChildB from '../components/advanceUse/ChildB.vue'
 
 Vue.use(Vuerouter)
 
+console.log(ChildB, 'Sport')
 
 var routes = [
     { path: '/news', component: ChildB },
